@@ -41,7 +41,7 @@ class ReactNativePermissions {
 	check(permission) {
 		const androidPermission = RNPTypes[permission]
   	if (!androidPermission) return Promise.reject(`ReactNativePermissions: ${permission} is not a valid permission type on Android`);
-		
+
 		const shouldShowRationale = ReactNative.NativeModules.PermissionsAndroid.shouldShowRequestPermissionRationale;
 
 		return RNPermissions.check(androidPermission)
@@ -72,14 +72,21 @@ class ReactNativePermissions {
 			});
 	}
 
-	checkMultiple(permissions) {
-		return Promise.all(permissions.map(this.check.bind(this)))
-			.then(res => res.reduce((pre, cur, i) => {
-				var name = permissions[i]
-				pre[name] = cur
-				return pre
-			}, {}))
-	}
+  checkMultiple(permissions) {
+    let perm_promises = []
+    let perm_names = Object.keys(permissions)
+    perm_names.forEach( perm_name => {
+				perm_promises.push(this.check(perm_name))
+		}, this)
+
+    return Promise.all(perm_promises)
+    .then(res =>
+			res.reduce((acc, cur, i) => {
+				acc[perm_names[i]] = cur
+				return acc
+			}, {})
+  )
+  }
 }
 
 module.exports = new ReactNativePermissions()

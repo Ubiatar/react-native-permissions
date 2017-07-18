@@ -4,67 +4,74 @@ const ReactNative = require('react-native');
 const RNPermissions = ReactNative.NativeModules.ReactNativePermissions;
 
 const RNPTypes = [
-	'location',
-	'camera',
-	'microphone',
-	'photo',
-	'contacts',
-	'event',
-	'reminder',
-	'bluetooth',
-	'notification',
-	'backgroundRefresh',
-	'speechRecognition',
+  'location',
+  'camera',
+  'microphone',
+  'photo',
+  'contacts',
+  'event',
+  'reminder',
+  'bluetooth',
+  'notification',
+  'backgroundRefresh',
+  'speechRecognition',
 ]
 
 const DEFAULTS = {
-	'location' : 'whenInUse',
-	'notification': ['alert', 'badge', 'sound'],
+  'location' : 'whenInUse',
+  'notification': ['alert', 'badge', 'sound'],
 }
 
 class ReactNativePermissions {
-	canOpenSettings() {
-		return RNPermissions.canOpenSettings()
-	}
+  canOpenSettings() {
+    return RNPermissions.canOpenSettings()
+  }
 
-	openSettings() {
-		return RNPermissions.openSettings()
-	}
+  openSettings() {
+    return RNPermissions.openSettings()
+  }
 
-	getTypes() {
-		return RNPTypes;
-	}
+  getTypes() {
+    return RNPTypes;
+  }
 
-	check(permission, type) {
-  	if (!RNPTypes.includes(permission)) {
-			return Promise.reject(`ReactNativePermissions: ${permission} is not a valid permission type on iOS`);
-		}
-		
-		return RNPermissions.getPermissionStatus(permission, type);
-	}
+  check(permission, type) {
+    if (!RNPTypes.includes(permission)) {
+      return Promise.reject(`ReactNativePermissions: ${permission} is not a valid permission type on iOS`);
+    }
 
-	request(permission, type) {
-		if (!RNPTypes.includes(permission)) {
-			return Promise.reject(`ReactNativePermissions: ${permission} is not a valid permission type on iOS`);
-		}
+    return RNPermissions.getPermissionStatus(permission, type);
+  }
 
-		if (permission == 'backgroundRefresh') {
-			return Promise.reject('ReactNativePermissions: You cannot request backgroundRefresh')
-		}
+  request(permission, type) {
+    if (!RNPTypes.includes(permission)) {
+      return Promise.reject(`ReactNativePermissions: ${permission} is not a valid permission type on iOS`);
+    }
 
-		type = type || DEFAULTS[permission]
+    if (permission == 'backgroundRefresh') {
+      return Promise.reject('ReactNativePermissions: You cannot request backgroundRefresh')
+    }
 
-		return RNPermissions.requestPermission(permission, type)
-	}
+    type = type || DEFAULTS[permission]
 
-	checkMultiple(permissions) {
-		return Promise.all(permissions.map(this.check.bind(this)))
-			.then(res => res.reduce((pre, cur, i) => {
-				var name = permissions[i]
-				pre[name] = cur
-				return pre
-			}, {}))
-	}
+    return RNPermissions.requestPermission(permission, type)
+  }
+
+  checkMultiple(permissions) {
+    let perm_promises = []
+    let perm_names = Object.keys(permissions)
+    perm_names.forEach( perm_name => {
+      perm_promises.push(this.check(perm_name, permissions[perm_name]))
+  }, this)
+
+    return Promise.all(perm_promises)
+    .then(res =>
+    res.reduce((acc, cur, i) => {
+      acc[perm_names[i]] = cur
+      return acc
+    }, {})
+  )
+  }
 }
 
 module.exports = new ReactNativePermissions()
