@@ -61,7 +61,7 @@ const Permissions = require('react-native-permissions');
 
   //check the status of multiple permissions
   _checkCameraAndPhotos() {
-    Permissions.check(['camera', 'photo'])
+    Permissions.check({'camera': null, 'photo': null})
       .then(response => {
         //response is an object mapping type to permission
         this.setState({
@@ -126,7 +126,7 @@ Promises resolve into one of these statuses
 |---|---|---|
 | `check()` | `type` | - Returns a promise with the permission status. See iOS Notes for special cases |
 | `request()` | `type` | - Accepts any permission type except `backgroundRefresh`. If the current status is `undetermined`, shows the permission dialog and returns a promise with the resulting status. Otherwise, immediately return a promise with the current status. See iOS Notes for special cases|
-| `checkMultiple()` | `[types]` | - Accepts an array of permission types and returns a promise with an object mapping permission types to statuses |
+| `checkMultiple()` | `{permission: type}` | - Accepts an array of permission types and returns a promise with an object mapping permission types to statuses |
 | `getTypes()` | *none* | - Returns an array of valid permission types  |
 | `openSettings()` | *none* | - *(iOS only - 8.0 and later)* Switches the user to the settings page of your app |
 | `canOpenSettings()` | *none* | - *(iOS only)* Returns a boolean indicating if the device supports switching to the settings page |
